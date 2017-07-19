@@ -1,0 +1,11 @@
+{
+    \"Name\" : \"Minimap\",
+    \"Version\" : \"$$QTCREATOR_VERSION\",
+    \"CompatVersion\" : \"$$QTCREATOR_COMPAT_VERSION\",
+    \"Vendor\" : \"emJay Software Consulting AB\",
+    \"Copyright\" : \"(C) 2017 emJay SOftware Consulting AB\",
+    \"License\" : \"GNU LGPL 2.1\",
+    \"Category\" : \"Qt Creator\",
+    \"Description\" : \"Minimap Scrollbar\",
+    $$dependencyList
+}
