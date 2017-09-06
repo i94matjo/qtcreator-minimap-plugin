@@ -21,3 +21,7 @@ You can edit the settings under *Minimap* tab in the *Text Editor* category. The
 * Line Count Threshold
 
     The threshold where minimap scrollbar
+
+* Scrollbar slider alpha value
+
+    The alpha value of the scrollbar slider
