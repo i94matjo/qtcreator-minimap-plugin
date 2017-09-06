@@ -43,11 +43,13 @@ public:
    static bool enabled();
    static int width();
    static int lineCountThreshold();
+   static int alpha();
 
 signals:
    void enabledChanged(bool);
    void widthChanged(int);
    void lineCountThresholdChanged(int);
+   void alphaChanged(int);
 
 private:
    friend class MinimapSettingsPage;
@@ -55,10 +57,12 @@ private:
    void setEnabled(bool enabled);
    void setWidth(int width);
    void setLineCountThreshold(int lineCountThreshold);
+   void setAlpha(int alpha);
 
    bool m_enabled;
    int m_width;
    int m_lineCountThreshold;
+   int m_alpha;
    MinimapSettingsPage* m_settingsPage;
 };
 }

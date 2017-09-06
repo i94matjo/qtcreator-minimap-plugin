@@ -64,6 +64,7 @@ inline bool updatePixel(QRgb* scanLine,
                         bool blend,
                         const QChar& c,
                         int& x,
+                        int w,
                         int tab,
                         const QColor& bg,
                         const QColor& fg)
@@ -76,7 +77,7 @@ inline bool updatePixel(QRgb* scanLine,
          {
             scanLine[x++] = bg.rgb();
          }
-         if (x >= MinimapSettings::width())
+         if (x >= w)
          {
             return false;
          }
@@ -95,7 +96,7 @@ inline bool updatePixel(QRgb* scanLine,
       {
          scanLine[x++] = isSpace ? bg.rgb() : fg.rgb();
       }
-      if (x >= MinimapSettings::width())
+      if (x >= w)
       {
          return false;
       }
@@ -147,7 +148,10 @@ public:
 
    int width() const
    {
-      return MinimapSettings::width() + Constants::MINIMAP_EXTRA_AREA_WIDTH;
+      int w = m_editor->extraArea() ? m_editor->extraArea()->width() : 0;
+      return qMin(
+         m_editor->width() - w,
+         MinimapSettings::width() + Constants::MINIMAP_EXTRA_AREA_WIDTH);
    }
 
    const QRect& groove() const
@@ -222,6 +226,8 @@ private:
       connect(MinimapSettings::instance(),
               &MinimapSettings::lineCountThresholdChanged, this,
               &MinimapStyleObject::deferedUpdate);
+      connect(MinimapSettings::instance(), &MinimapSettings::alphaChanged, this,
+              &MinimapStyleObject::fontSettingsChanged);
       connect(scrollbar, &QAbstractSlider::valueChanged, this,
               &MinimapStyleObject::updateSubControlRects);
       fontSettingsChanged();
@@ -244,13 +250,13 @@ private:
       }
       if (m_backgroundColor.value() < 128)
       {
-         m_overlayColor = m_backgroundColor.lighter();
+         m_overlayColor = QColor(Qt::white);
       }
       else
       {
-         m_overlayColor = m_backgroundColor.darker();
+         m_overlayColor = QColor(Qt::black);
       }
-      m_overlayColor.setAlpha(64);
+      m_overlayColor.setAlpha(MinimapSettings::alpha());
       deferedUpdate();
    }
 
@@ -272,8 +278,7 @@ private:
       int w = scrollbar->width();
       int h = scrollbar->height();
       m_factor = m_lineCount <= h ? 1.0 : h / static_cast<qreal>(m_lineCount);
-      int width =
-         MinimapSettings::width() + Constants::MINIMAP_EXTRA_AREA_WIDTH;
+      int width = this->width();
       m_groove = QRect(width, 0, w - width, qMin(m_lineCount, h));
       updateSubControlRects();
       scrollbar->updateGeometry();
@@ -464,8 +469,8 @@ bool MinimapStyle::drawMinimap(const QStyleOptionComplex* option,
    qreal step = 1 / factor;
    QColor baseBg = o->background();
    QColor baseFg = o->foreground();
-   QImage image(MinimapSettings::width() + Constants::MINIMAP_EXTRA_AREA_WIDTH,
-                h, QImage::Format_RGB32);
+   int w = o->width() - Constants::MINIMAP_EXTRA_AREA_WIDTH;
+   QImage image(o->width(), h, QImage::Format_RGB32);
    image.fill(baseBg);
    QTextDocument* doc = o->editor()->document();
    TextEditor::TextDocumentLayout* documentLayout =
@@ -557,7 +562,7 @@ bool MinimapStyle::drawMinimap(const QStyleOptionComplex* option,
                }
                cont =
                   updatePixel(&scanLine[Constants::MINIMAP_EXTRA_AREA_WIDTH],
-                              !updateY, c, x, tab, bg, fg);
+                              !updateY, c, x, w, tab, bg, fg);
                if (!cont)
                {
                   break;
