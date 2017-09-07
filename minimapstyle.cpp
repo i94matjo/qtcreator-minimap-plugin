@@ -127,9 +127,16 @@ public:
    , m_update(false)
    {
       m_editor->installEventFilter(this);
-      connect(m_editor->textDocument(),
-              &TextEditor::TextDocument::openFinishedSuccessfully, this,
-              &MinimapStyleObject::documentOpened);
+      if (!m_editor->textDocument()->document()->isEmpty())
+      {
+         init();
+      }
+      else
+      {
+         connect(m_editor->textDocument()->document(),
+                 &QTextDocument::contentsChanged, this,
+                 &MinimapStyleObject::contentsChanged);
+      }
    }
 
    ~MinimapStyleObject()
@@ -205,7 +212,7 @@ public:
    }
 
 private:
-   void documentOpened()
+   void init()
    {
       QScrollBar* scrollbar = m_editor->verticalScrollBar();
       scrollbar->setProperty(Constants::MINIMAP_STYLE_OBJECT_PROPERTY,
@@ -231,6 +238,14 @@ private:
       connect(scrollbar, &QAbstractSlider::valueChanged, this,
               &MinimapStyleObject::updateSubControlRects);
       fontSettingsChanged();
+   }
+
+   void contentsChanged()
+   {
+      disconnect(m_editor->textDocument()->document(),
+                 &QTextDocument::contentsChanged, this,
+                 &MinimapStyleObject::contentsChanged);
+      init();
    }
 
    void fontSettingsChanged()
